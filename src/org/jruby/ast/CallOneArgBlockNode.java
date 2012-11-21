@@ -35,6 +35,7 @@ package org.jruby.ast;
 import org.jruby.Ruby;
 import org.jruby.javasupport.util.RuntimeHelpers;
 import org.jruby.lexer.yacc.ISourcePosition;
+import org.jruby.parser.StaticScope;
 import org.jruby.runtime.Block;
 import org.jruby.runtime.ThreadContext;
 import org.jruby.runtime.builtin.IRubyObject;
@@ -51,6 +52,14 @@ public final class CallOneArgBlockNode extends CallNode {
         assert args.size() == 1 : "args.size() is 1";
         
         arg1 = args.get(0);        
+    }
+
+    public CallOneArgBlockNode(ISourcePosition position, Node receiverNode, String name, ArrayNode args, IterNode iter, StaticScope refinementScope) {
+        super(position, receiverNode, name, args, iter, refinementScope);
+
+        assert args.size() == 1 : "args.size() is 1";
+
+        arg1 = args.get(0);
     }
         
     @Override

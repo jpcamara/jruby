@@ -37,6 +37,7 @@ import org.jruby.RubyLocalJumpError.Reason;
 import org.jruby.exceptions.JumpException;
 import org.jruby.javasupport.util.RuntimeHelpers;
 import org.jruby.lexer.yacc.ISourcePosition;
+import org.jruby.parser.StaticScope;
 import org.jruby.runtime.Block;
 import org.jruby.runtime.ThreadContext;
 import org.jruby.runtime.builtin.IRubyObject;
@@ -50,11 +51,19 @@ public final class CallNoArgBlockNode extends CallNode {
         super(position, receiverNode, name, null, iter);
     }
 
+    public CallNoArgBlockNode(ISourcePosition position, Node receiverNode, String name, IterNode iter, StaticScope refinementScope) {
+        super(position, receiverNode, name, null, iter, refinementScope);
+    }
+
     // For 'b.foo()'.  Args are only significant in maintaining backwards compatible AST structure
     public CallNoArgBlockNode(ISourcePosition position, Node receiverNode, String name, Node args, IterNode iter) {
         super(position, receiverNode, name, args, iter);
     }
-        
+
+    public CallNoArgBlockNode(ISourcePosition position, Node receiverNode, String name, Node args, IterNode iter, StaticScope refinementScope) {
+        super(position, receiverNode, name, args, iter, refinementScope);
+    }
+
     @Override
     public IRubyObject interpret(Ruby runtime, ThreadContext context, IRubyObject self, Block aBlock) {
         IRubyObject receiver = getReceiverNode().interpret(runtime, context, self, aBlock);

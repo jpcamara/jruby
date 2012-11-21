@@ -35,6 +35,7 @@ package org.jruby.ast;
 import org.jruby.Ruby;
 import org.jruby.javasupport.util.RuntimeHelpers;
 import org.jruby.lexer.yacc.ISourcePosition;
+import org.jruby.parser.StaticScope;
 import org.jruby.runtime.Block;
 import org.jruby.runtime.ThreadContext;
 import org.jruby.runtime.builtin.IRubyObject;
@@ -52,6 +53,16 @@ public final class CallThreeArgBlockNode extends CallNode {
         
         assert args.size() == 3 : "args.size() is 3";
         
+        arg1 = args.get(0);
+        arg2 = args.get(1);
+        arg3 = args.get(2);
+    }
+
+    public CallThreeArgBlockNode(ISourcePosition position, Node receiverNode, String name, ArrayNode args, IterNode iter, StaticScope refinementScope) {
+        super(position, receiverNode, name, args, iter, refinementScope);
+
+        assert args.size() == 3 : "args.size() is 3";
+
         arg1 = args.get(0);
         arg2 = args.get(1);
         arg3 = args.get(2);

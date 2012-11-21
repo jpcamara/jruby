@@ -189,6 +189,7 @@ public class AnnotationBinder extends AbstractProcessor {
                     switch (read) {
                         case BACKREF:
                         case LASTLINE:
+                        case CREF:
                             if (DEBUG)
                                 LOG.debug("Method reads scope field {}: {}: {}", read, methodDescs.get(0).getEnclosingElement(), methodDescs);
                             scope = true;
@@ -204,6 +205,7 @@ public class AnnotationBinder extends AbstractProcessor {
                     switch (write) {
                         case BACKREF:
                         case LASTLINE:
+                        case CREF:
                             if (DEBUG)
                                 LOG.debug("Method writes scope field {}: {}: {}", write, methodDescs.get(0).getEnclosingElement(), methodDescs);
                             scope = true;

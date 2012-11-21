@@ -34,6 +34,7 @@ package org.jruby.ast;
 
 import org.jruby.Ruby;
 import org.jruby.lexer.yacc.ISourcePosition;
+import org.jruby.parser.StaticScope;
 import org.jruby.runtime.Block;
 import org.jruby.runtime.ThreadContext;
 import org.jruby.runtime.builtin.IRubyObject;
@@ -50,6 +51,15 @@ public final class CallTwoArgNode extends CallNode {
         
         assert args.size() == 2 : "args.size() is 2";
         
+        arg1 = args.get(0);
+        arg2 = args.get(1);
+    }
+
+    public CallTwoArgNode(ISourcePosition position, Node receiverNode, String name, ArrayNode args, StaticScope refinementScope) {
+        super(position, receiverNode, name, args, null, refinementScope);
+
+        assert args.size() == 2 : "args.size() is 2";
+
         arg1 = args.get(0);
         arg2 = args.get(1);
     }

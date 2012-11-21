@@ -37,6 +37,7 @@ import org.jruby.RubyLocalJumpError.Reason;
 import org.jruby.exceptions.JumpException;
 import org.jruby.javasupport.util.RuntimeHelpers;
 import org.jruby.lexer.yacc.ISourcePosition;
+import org.jruby.parser.StaticScope;
 import org.jruby.runtime.Block;
 import org.jruby.runtime.ThreadContext;
 import org.jruby.runtime.builtin.IRubyObject;
@@ -47,6 +48,10 @@ import org.jruby.runtime.builtin.IRubyObject;
 public final class CallManyArgsBlockNode extends CallNode {
     public CallManyArgsBlockNode(ISourcePosition position, Node receiverNode, String name, Node args, IterNode iter) {
         super(position, receiverNode, name, args, iter);
+    }
+
+    public CallManyArgsBlockNode(ISourcePosition position, Node receiverNode, String name, ArrayNode args, IterNode iter, StaticScope refinementScope) {
+        super(position, receiverNode, name, args, iter, refinementScope);
     }
         
     @Override

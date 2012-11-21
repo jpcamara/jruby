@@ -978,10 +978,21 @@ public class ParserSupport {
         ISourcePosition position = position(receiver, name);
         
         if (receiver == null) receiver = NilImplicitNode.NIL;
-        
-        if (iter != null) return new CallNoArgBlockNode(position, receiver, (String) name.getValue(), iter);
-        
-        return new CallNoArgNode(position, receiver, (String) name.getValue());
+
+        if (name.equals("using")) getCurrentScope().setRefined(true);
+
+        if (getCurrentScope().isRefined()) {
+
+            if (iter != null) return new CallNoArgBlockNode(position, receiver, (String) name.getValue(), iter, getCurrentScope());
+
+            return new CallNoArgNode(position, receiver, (String) name.getValue(), getCurrentScope());
+
+        } else {
+
+            if (iter != null) return new CallNoArgBlockNode(position, receiver, (String) name.getValue(), iter);
+
+            return new CallNoArgNode(position, receiver, (String) name.getValue());
+        }
     }
     
     private Node new_call_complexargs(Node receiver, Token name, Node args, Node iter) {
@@ -995,6 +1006,8 @@ public class ParserSupport {
             return new_call_blockpass(receiver, name, (BlockPassNode) args);
         }
 
+        if (name.equals("using")) getCurrentScope().setRefined(true);
+
         if (iter != null) return new CallSpecialArgBlockNode(position(receiver, args), receiver,(String) name.getValue(), args, (IterNode) iter);
 
         return new CallSpecialArgNode(position(receiver, args), receiver, (String) name.getValue(), args);
@@ -1004,6 +1017,8 @@ public class ParserSupport {
         ISourcePosition position = position(receiver, blockPass);
         String name = (String) operation.getValue();
         Node args = blockPass.getArgsNode();
+
+        if (name.equals("using")) getCurrentScope().setRefined(true);
         
         if (args == null) return new CallNoArgBlockPassNode(position, receiver, name, args, blockPass);
         if (!(args instanceof ArrayNode)) return new CallSpecialArgBlockPassNode(position, receiver, name, args, blockPass);
@@ -1055,27 +1070,56 @@ public class ParserSupport {
         
         ArrayNode args = (ArrayNode) argsNode;
 
-        switch (args.size()) {
-            case 0:
-                if (iter != null) return new CallNoArgBlockNode(position(receiver, args), receiver, (String) name.getValue(), args, (IterNode) iter);
-                    
-                return new CallNoArgNode(position(receiver, args), receiver, args, (String) name.getValue());
-            case 1:
-                if (iter != null) return new CallOneArgBlockNode(position(receiver, args), receiver, (String) name.getValue(), args, (IterNode) iter);
+        if (getCurrentScope().isRefined()) {
 
-                return new CallOneArgNode(position(receiver, args), receiver, (String) name.getValue(), args);
-            case 2:
-                if (iter != null) return new CallTwoArgBlockNode(position(receiver, args), receiver, (String) name.getValue(), args, (IterNode) iter);
-                
-                return new CallTwoArgNode(position(receiver, args), receiver, (String) name.getValue(), args);
-            case 3:
-                if (iter != null) return new CallThreeArgBlockNode(position(receiver, args), receiver, (String) name.getValue(), args, (IterNode) iter);
-                
-                return new CallThreeArgNode(position(receiver, args), receiver, (String) name.getValue(), args);
-            default:
-                if (iter != null) return new CallManyArgsBlockNode(position(receiver, args), receiver, (String) name.getValue(), args, (IterNode) iter);
+            switch (args.size()) {
+                case 0:
+                    if (iter != null) return new CallNoArgBlockNode(position(receiver, args), receiver, (String) name.getValue(), args, (IterNode) iter, getCurrentScope());
 
-                return new CallManyArgsNode(position(receiver, args), receiver, (String) name.getValue(), args);
+                    return new CallNoArgNode(position(receiver, args), receiver, args, (String) name.getValue(), getCurrentScope());
+                case 1:
+                    if (iter != null) return new CallOneArgBlockNode(position(receiver, args), receiver, (String) name.getValue(), args, (IterNode) iter, getCurrentScope());
+
+                    return new CallOneArgNode(position(receiver, args), receiver, (String) name.getValue(), args, getCurrentScope());
+                case 2:
+                    if (iter != null) return new CallTwoArgBlockNode(position(receiver, args), receiver, (String) name.getValue(), args, (IterNode) iter, getCurrentScope());
+
+                    return new CallTwoArgNode(position(receiver, args), receiver, (String) name.getValue(), args, getCurrentScope());
+                case 3:
+                    if (iter != null) return new CallThreeArgBlockNode(position(receiver, args), receiver, (String) name.getValue(), args, (IterNode) iter, getCurrentScope());
+
+                    return new CallThreeArgNode(position(receiver, args), receiver, (String) name.getValue(), args, getCurrentScope());
+                default:
+                    if (iter != null) return new CallManyArgsBlockNode(position(receiver, args), receiver, (String) name.getValue(), args, (IterNode) iter);
+
+                    return new CallManyArgsNode(position(receiver, args), receiver, (String) name.getValue(), args, getCurrentScope());
+            }
+
+        } else {
+
+            switch (args.size()) {
+                case 0:
+                    if (iter != null) return new CallNoArgBlockNode(position(receiver, args), receiver, (String) name.getValue(), args, (IterNode) iter);
+
+                    return new CallNoArgNode(position(receiver, args), receiver, args, (String) name.getValue());
+                case 1:
+                    if (iter != null) return new CallOneArgBlockNode(position(receiver, args), receiver, (String) name.getValue(), args, (IterNode) iter);
+
+                    return new CallOneArgNode(position(receiver, args), receiver, (String) name.getValue(), args);
+                case 2:
+                    if (iter != null) return new CallTwoArgBlockNode(position(receiver, args), receiver, (String) name.getValue(), args, (IterNode) iter);
+
+                    return new CallTwoArgNode(position(receiver, args), receiver, (String) name.getValue(), args);
+                case 3:
+                    if (iter != null) return new CallThreeArgBlockNode(position(receiver, args), receiver, (String) name.getValue(), args, (IterNode) iter);
+
+                    return new CallThreeArgNode(position(receiver, args), receiver, (String) name.getValue(), args);
+                default:
+                    if (iter != null) return new CallManyArgsBlockNode(position(receiver, args), receiver, (String) name.getValue(), args, (IterNode) iter);
+
+                    return new CallManyArgsNode(position(receiver, args), receiver, (String) name.getValue(), args);
+            }
+
         }
     }
 
@@ -1105,13 +1149,19 @@ public class ParserSupport {
     }
 
     private Node new_fcall_noargs(Token operation, IterNode iter) {
-        if (iter != null) return new FCallNoArgBlockNode(operation.getPosition(), (String) operation.getValue(), iter);
-        return new FCallNoArgNode(operation.getPosition(), (String) operation.getValue());
+        String name = (String) operation.getValue();
+
+        if (name.equals("using")) getCurrentScope().setRefined(true);
+
+        if (iter != null) return new FCallNoArgBlockNode(operation.getPosition(), name, iter);
+        return new FCallNoArgNode(operation.getPosition(), name);
     }
     
     private Node new_fcall_simpleargs(Token operation, ArrayNode args, Node iter) {
         String name = (String) operation.getValue();
         ISourcePosition position = position(operation, args);
+
+        if (name.equals("using")) getCurrentScope().setRefined(true);
             
         switch (args.size()) {
             case 0:  // foo()
@@ -1141,6 +1191,8 @@ public class ParserSupport {
         ISourcePosition position = position(operation, blockPass);
         String name = (String) operation.getValue();
         Node args = blockPass.getArgsNode();
+
+        if (name.equals("using")) getCurrentScope().setRefined(true);
         
         if (args == null) return new FCallNoArgBlockPassNode(position, name, args, blockPass);
         if (!(args instanceof ArrayNode)) return new FCallSpecialArgBlockPassNode(position, name, args, blockPass);
@@ -1169,7 +1221,11 @@ public class ParserSupport {
                     lexer.getCurrentLine(), "Both block arg and actual block given.");
         }
 
-        return new FCallSpecialArgNode(position(operation, args), (String) operation.getValue(), args);
+        String name = (String) operation.getValue();
+
+        if (name.equals("using")) getCurrentScope().setRefined(true);
+
+        return new FCallSpecialArgNode(position(operation, args), name, args);
     }
 
     public Node new_super(Node args, Token operation) {

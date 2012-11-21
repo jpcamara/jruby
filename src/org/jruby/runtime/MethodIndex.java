@@ -31,26 +31,10 @@ package org.jruby.runtime;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.jruby.runtime.callsite.LtCallSite;
-import org.jruby.runtime.callsite.LeCallSite;
-import org.jruby.runtime.callsite.MinusCallSite;
-import org.jruby.runtime.callsite.MulCallSite;
-import org.jruby.runtime.callsite.NormalCachingCallSite;
-import org.jruby.runtime.callsite.GtCallSite;
-import org.jruby.runtime.callsite.PlusCallSite;
-import org.jruby.runtime.callsite.GeCallSite;
+
+import org.jruby.parser.StaticScope;
+import org.jruby.runtime.callsite.*;
 import org.jruby.RubyInstanceConfig;
-import org.jruby.runtime.callsite.CmpCallSite;
-import org.jruby.runtime.callsite.EqCallSite;
-import org.jruby.runtime.callsite.BitAndCallSite;
-import org.jruby.runtime.callsite.BitOrCallSite;
-import org.jruby.runtime.callsite.FunctionalCachingCallSite;
-import org.jruby.runtime.callsite.RespondToCallSite;
-import org.jruby.runtime.callsite.ShiftLeftCallSite;
-import org.jruby.runtime.callsite.ShiftRightCallSite;
-import org.jruby.runtime.callsite.SuperCallSite;
-import org.jruby.runtime.callsite.VariableCachingCallSite;
-import org.jruby.runtime.callsite.XorCallSite;
 import org.jruby.runtime.invokedynamic.MethodNames;
 
 /**
@@ -89,6 +73,10 @@ public class MethodIndex {
                 !(RubyInstanceConfig.FULL_TRACE_ENABLED)) return getFastFixnumOpsCallSite(name);
 
         return new NormalCachingCallSite(name);
+    }
+
+    public static CallSite getRefinedCallSite(String name, StaticScope refinementScope) {
+        return new RefinedCallSite(name, refinementScope);
     }
     
     private static final Map<String, String> FIXNUM_OPS = new HashMap<String, String>();

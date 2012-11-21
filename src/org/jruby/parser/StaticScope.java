@@ -29,6 +29,11 @@
 package org.jruby.parser;
 
 import java.io.Serializable;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.IdentityHashMap;
+import java.util.Map;
+import java.util.Set;
 
 import org.jruby.Ruby;
 import org.jruby.RubyModule;
@@ -61,6 +66,12 @@ public abstract class StaticScope implements Serializable {
     
     // Live reference to module
     private transient RubyModule cref = null;
+
+    // refinements active in this scope
+    private Set<RubyModule> ndRefinements = Collections.synchronizedSet(new HashSet<RubyModule>());
+
+    // whether this scope will be refined when executed
+    private boolean refined = false;
     
     // Next CRef down the lexical structure
     private StaticScope previousCRefScope = null;
@@ -81,6 +92,22 @@ public abstract class StaticScope implements Serializable {
     
     private DynamicScope dummyScope;
 
+    public boolean isRefined() {
+        return refined;
+    }
+
+    public void setRefined(boolean refined) {
+        this.refined = refined;
+    }
+
+    public boolean hasRefinements() {
+        return ndRefinements.size() > 0;
+    }
+
+    public Set<RubyModule> getRefinements() {
+        return ndRefinements;
+    }
+
     /**
      * Construct a new static scope. The array of strings should all be the
      * interned versions, since several other optimizations depend on being
@@ -95,6 +122,8 @@ public abstract class StaticScope implements Serializable {
         
         this.enclosingScope = enclosingScope;
         this.variableNames = names;
+
+        this.refined = enclosingScope == null ? false : enclosingScope.refined;
     }
 
     /**

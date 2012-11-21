@@ -53,6 +53,7 @@ import org.jruby.internal.runtime.methods.CallConfiguration;
 import org.jruby.internal.runtime.methods.DynamicMethod;
 import org.jruby.internal.runtime.methods.JavaMethod.JavaMethodNBlock;
 import org.jruby.javasupport.util.RuntimeHelpers;
+import org.jruby.parser.StaticScope;
 import org.jruby.platform.Platform;
 import org.jruby.runtime.Binding;
 import org.jruby.runtime.Block;
@@ -76,9 +77,11 @@ import java.util.Map;
 
 import static org.jruby.CompatVersion.RUBY1_8;
 import static org.jruby.CompatVersion.RUBY1_9;
+import static org.jruby.CompatVersion.RUBY2_0;
 import static org.jruby.RubyEnumerator.enumeratorize;
 import static org.jruby.anno.FrameField.BACKREF;
 import static org.jruby.anno.FrameField.BLOCK;
+import static org.jruby.anno.FrameField.CREF;
 import static org.jruby.anno.FrameField.LASTLINE;
 import static org.jruby.anno.FrameField.METHODNAME;
 import static org.jruby.runtime.Visibility.PRIVATE;
@@ -2103,17 +2106,17 @@ public class RubyKernel {
         return ((RubyBasicObject)self).nil_p(context);
     }
 
-    @JRubyMethod(name = "=~", required = 1, compat = RUBY1_8)
+    @JRubyMethod(name = "=~", required = 1, compat = RUBY1_8, writes = BACKREF)
     public static IRubyObject op_match(ThreadContext context, IRubyObject self, IRubyObject arg) {
         return ((RubyBasicObject)self).op_match(context, arg);
     }
 
-    @JRubyMethod(name = "=~", required = 1, compat = RUBY1_9)
+    @JRubyMethod(name = "=~", required = 1, compat = RUBY1_9, writes = BACKREF)
     public static IRubyObject op_match19(ThreadContext context, IRubyObject self, IRubyObject arg) {
         return ((RubyBasicObject)self).op_match19(context, arg);
     }
 
-    @JRubyMethod(name = "!~", required = 1, compat = RUBY1_9)
+    @JRubyMethod(name = "!~", required = 1, compat = RUBY1_9, writes = BACKREF)
     public static IRubyObject op_not_match(ThreadContext context, IRubyObject self, IRubyObject arg) {
         return ((RubyBasicObject)self).op_not_match(context, arg);
     }
@@ -2146,5 +2149,21 @@ public class RubyKernel {
     @JRubyMethod(name = "instance_variables", compat = RUBY1_9)
     public static RubyArray instance_variables19(ThreadContext context, IRubyObject self) {
         return ((RubyBasicObject)self).instance_variables19(context);
+    }
+
+    @JRubyMethod(name = "using", compat = RUBY2_0, reads = CREF)
+    public static IRubyObject using(ThreadContext context, IRubyObject self, IRubyObject module) {
+        Ruby runtime = context.runtime;
+
+        if (!(module instanceof RubyModule)) {
+            throw runtime.newTypeError(module, runtime.getModule());
+        }
+
+        RubyModule refinement = (RubyModule)module;
+        StaticScope scope = context.getCurrentScope().getStaticScope();
+
+        scope.getRefinements().add(refinement);
+
+        return self;
     }
 }

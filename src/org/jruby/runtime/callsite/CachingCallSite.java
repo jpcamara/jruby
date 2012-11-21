@@ -434,14 +434,14 @@ public abstract class CachingCallSite extends CallSite {
         return selfType;
     }
 
-    private static IRubyObject handleBreakJump(ThreadContext context, BreakJump bj) throws BreakJump {
+    protected static IRubyObject handleBreakJump(ThreadContext context, BreakJump bj) throws BreakJump {
         if (context.getFrameJumpTarget() == bj.getTarget()) {
             return (IRubyObject) bj.getValue();
         }
         throw bj;
     }
 
-    private static RaiseException retryJumpError(ThreadContext context) {
+    protected static RaiseException retryJumpError(ThreadContext context) {
         return context.runtime.newLocalJumpError(RubyLocalJumpError.Reason.RETRY, context.runtime.getNil(), "retry outside of rescue not supported");
     }
 }

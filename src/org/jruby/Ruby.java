@@ -4551,4 +4551,15 @@ public final class Ruby {
     public void addToObjectSpace(boolean useObjectSpace, IRubyObject object) {
         objectSpacer.addToObjectSpace(this, useObjectSpace, object);
     }
+
+    public int getRefinementToken() {
+        return refinementToken;
+    }
+
+    public void incrementRefinementToken() {
+        refinementToken = REFINEMENT_TOKENS.incrementAndGet();
+    }
+
+    private final AtomicInteger REFINEMENT_TOKENS = new AtomicInteger();
+    private int refinementToken = REFINEMENT_TOKENS.incrementAndGet();
 }

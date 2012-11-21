@@ -32,18 +32,23 @@
  ***** END LICENSE BLOCK *****/
 package org.jruby.ast;
 
+import org.jruby.IncludedModuleWrapper;
 import org.jruby.Ruby;
 import org.jruby.RubyClass;
+import org.jruby.RubyModule;
 import org.jruby.RubyString;
 import org.jruby.exceptions.JumpException;
 import org.jruby.internal.runtime.methods.DynamicMethod;
 import org.jruby.javasupport.util.RuntimeHelpers;
 import org.jruby.lexer.yacc.ISourcePosition;
+import org.jruby.parser.StaticScope;
 import org.jruby.runtime.Block;
 import org.jruby.runtime.ThreadContext;
 import org.jruby.runtime.Visibility;
 import org.jruby.runtime.builtin.IRubyObject;
 import org.jruby.util.ByteList;
+
+import java.util.Set;
 
 /**
  * A method or operator call.
@@ -53,15 +58,25 @@ public final class CallNoArgNode extends CallNode {
     public CallNoArgNode(ISourcePosition position, Node receiverNode, String name) {
         super(position, receiverNode, name, null, null);
     }
+
+    public CallNoArgNode(ISourcePosition position, Node receiverNode, String name, StaticScope refinementScope) {
+        super(position, receiverNode, name, null, null, refinementScope);
+    }
     
     // For 'b.foo()'.  Args are only significant in maintaining backwards compatible AST structure
     public CallNoArgNode(ISourcePosition position, Node receiverNode, Node args, String name) {
         super(position, receiverNode, name, args, null);
     }
+
+    public CallNoArgNode(ISourcePosition position, Node receiverNode, Node args, String name, StaticScope refinementScope) {
+        super(position, receiverNode, name, args, null, refinementScope);
+    }
     
     @Override
     public IRubyObject interpret(Ruby runtime, ThreadContext context, IRubyObject self, Block aBlock) {
-        return callAdapter.call(context, self, getReceiverNode().interpret(runtime, context, self, aBlock));
+        IRubyObject receiver = getReceiverNode().interpret(runtime, context, self, aBlock);
+
+        return callAdapter.call(context, self, receiver);
     }
     
     @Override

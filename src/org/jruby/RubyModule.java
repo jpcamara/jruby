@@ -47,15 +47,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.security.AccessControlException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
@@ -2772,6 +2764,34 @@ public class RubyModule extends RubyObject {
         }
         invalidateConstantCache();
         return this;
+    }
+
+    @JRubyMethod(compat = RUBY2_0)
+    public IRubyObject refine(ThreadContext context, IRubyObject module, Block block) {
+        Ruby runtime = context.runtime;
+
+        if (!(module instanceof RubyModule)) {
+            throw runtime.newTypeError(module, runtime.getModule());
+        }
+
+        RubyModule modToRefine = (RubyModule)module;
+
+        synchronized (refinements) {
+            RubyModule refined = refinements.get(modToRefine);
+            if (refined == null) refinements.put(modToRefine, refined = newModule(runtime));
+
+            refined.module_eval(context, block);
+        }
+
+        return this;
+    }
+
+    private final Map<RubyModule, RubyModule> refinements = new IdentityHashMap<RubyModule, RubyModule>();
+
+    public RubyModule refinementForModule(RubyModule module) {
+        synchronized (refinements) {
+            return refinements.get(module);
+        }
     }
 
     private void setConstantVisibility(ThreadContext context, String name, boolean hidden) {

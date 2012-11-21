@@ -45,6 +45,7 @@ import org.jruby.exceptions.JumpException;
 import org.jruby.internal.runtime.methods.DynamicMethod;
 import org.jruby.javasupport.util.RuntimeHelpers;
 import org.jruby.lexer.yacc.ISourcePosition;
+import org.jruby.parser.StaticScope;
 import org.jruby.runtime.Block;
 import org.jruby.runtime.CallSite;
 import org.jruby.runtime.CallType;
@@ -79,6 +80,18 @@ public class CallNode extends Node implements INameNode, IArgumentNode, BlockAcc
         setArgsNode(argsNode);
         this.iterNode = iterNode;
         this.callAdapter = MethodIndex.getCallSite(name);
+    }
+
+    public CallNode(ISourcePosition position, Node receiverNode, String name, Node argsNode,
+                    Node iterNode, StaticScope refinementScope) {
+        super(position);
+
+        assert receiverNode != null : "receiverNode is not null";
+
+        this.receiverNode = receiverNode;
+        setArgsNode(argsNode);
+        this.iterNode = iterNode;
+        this.callAdapter = MethodIndex.getRefinedCallSite(name, refinementScope);
     }
 
     public NodeType getNodeType() {
