@@ -2783,6 +2783,8 @@ public class RubyModule extends RubyObject {
             refined.module_eval(context, block);
         }
 
+        runtime.incrementRefinementToken();
+
         return this;
     }
 
