@@ -2776,16 +2776,23 @@ public class RubyModule extends RubyObject {
 
         RubyModule modToRefine = (RubyModule)module;
 
-        synchronized (refinements) {
-            RubyModule refined = refinements.get(modToRefine);
-            if (refined == null) refinements.put(modToRefine, refined = newModule(runtime));
+        try {
+            synchronized (refinements) {
+                RubyModule refined = refinements.get(modToRefine);
+                if (refined == null) refinements.put(modToRefine, refined = newModule(runtime));
 
-            refined.module_eval(context, block);
+                refined.module_eval(context, block);
+
+                return refined;
+            }
+        } finally {
+            runtime.incrementRefinementToken();
         }
+    }
 
-        runtime.incrementRefinementToken();
-
-        return this;
+    @JRubyMethod(compat = RUBY2_0)
+    public IRubyObject refinements(ThreadContext context, Block block) {
+        return new RubyHash(context.runtime, refinements, context.nil);
     }
 
     private final Map<RubyModule, RubyModule> refinements = new IdentityHashMap<RubyModule, RubyModule>();
